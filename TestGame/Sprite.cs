@@ -19,33 +19,57 @@ namespace TestGame
 
 	class Sprite
 	{
-		private Texture2D texture;
-		private float rotation;
-		private Direction lastDirection = Direction.None;
+		private float Rotation { get; set; }
+		private Direction LastDirection { get; set; }
 
-		public Vector2 Position;
-		public Vector2 Origin;
+		public Texture2D Texture { get; private set; }
+		public Input Input { get; set; }
 
-		public float ActualLinearVelocity = 0.0f;
-		public float MaxLinearVelocity = 8f;
-		public float LinearAcceleration = 0.1f;
-		public float LinearDeceleration = 0.5f;
+		public Vector2 Position { get; set; }
+		public Vector2 Origin { get; set; }
 
-		public float ActualRotationVelocity = 0f;
-		public float MaxRotationVelocity = 5f;
-		public float RotationAcceleration = 0.1f;
-		public float RotationDeceleration = 0.5f;
+		public float ActualLinearVelocity { get; set; }
+		public float MaxLinearVelocity { get; set; }
+		public float LinearAcceleration { get; set; }
+		public float LinearDeceleration { get; set; } 
 
-		public float Scale = 1f;
+		public float ActualRotationVelocity { get; set; }
+		public float MaxRotationVelocity { get; set; }
+		public float RotationAcceleration { get; set; }
+		public float RotationDeceleration { get; set; }
 
-		public Sprite(Texture2D texture)
+		public float Scale { get; set; }
+
+		private Sprite()
 		{
-			this.texture = texture;
+			LastDirection = Direction.None;
+
+			Input = new Input(Keys.Up, Keys.Down, Keys.Left, Keys.Right);
+
+			Position = new Vector2(0, 0);
+			Origin = new Vector2(0, 0);
+
+			ActualLinearVelocity = 0.0f;
+			MaxLinearVelocity = 8.0f;
+			LinearAcceleration = 0.1f;
+			LinearDeceleration = 0.5f;
+
+			ActualRotationVelocity = 0.0f;
+			MaxRotationVelocity = 5.0f;
+			RotationAcceleration = 0.1f;
+			RotationDeceleration = 0.5f;
+
+			Scale = 1.0f;
+		}
+
+		public Sprite(Texture2D texture) : this()
+		{
+			this.Texture = texture;
 		}
 
 		public void Update()
 		{
-			if (Keyboard.GetState().IsKeyDown(Keys.Up))
+			if (Input.Up)
 			{
 				StopMovement(Direction.Backward);
 
@@ -55,7 +79,7 @@ namespace TestGame
 				Move(Direction.Forward);
 				TryRotation();
 			}
-			else if (Keyboard.GetState().IsKeyDown(Keys.Down))
+			else if (Input.Down)
 			{
 				StopMovement(Direction.Forward);
 
@@ -71,14 +95,14 @@ namespace TestGame
 				ActualLinearVelocity = DecreaseValue(ActualLinearVelocity, LinearDeceleration, 0);
 				ActualRotationVelocity = DecreaseValue(ActualRotationVelocity, RotationDeceleration, 0);
 				
-				Move(lastDirection);
+				Move(LastDirection);
 				Debug.WriteLine(TryRotation());
 			}
 		}
 
 		private void StopMovement(Direction direction)
 		{
-			if (lastDirection == direction)
+			if (LastDirection == direction)
 			{
 				ResetState();
 			}
@@ -87,10 +111,10 @@ namespace TestGame
 		private void Move(Direction direction)
 		{
 			Vector2 directionVector = new Vector2(
-				(float)Math.Sin(MathHelper.ToRadians(0) - rotation), 
-				(float)Math.Cos(MathHelper.ToRadians(0) - rotation));
+				(float)Math.Sin(MathHelper.ToRadians(0) - Rotation), 
+				(float)Math.Cos(MathHelper.ToRadians(0) - Rotation));
 
-			lastDirection = direction;
+			LastDirection = direction;
 
 			if (direction == Direction.Forward)
 			{
@@ -134,26 +158,26 @@ namespace TestGame
 
 		private bool IsUpOrDownKeyPressed()
 		{
-			return Keyboard.GetState().IsKeyDown(Keys.Up) || Keyboard.GetState().IsKeyDown(Keys.Down);
+			return Input.Up || Input.Down;
 		}
 
-		private static bool IsAnyKeyPressed()
+		private bool IsAnyKeyPressed()
 		{
-			return Keyboard.GetState().GetPressedKeys().Length > 0;
+			return Input.PressedKeys.Length > 0;
 		}
 
 		private bool TryRotation()
 		{
 			bool rotated = false;
 
-			if (Keyboard.GetState().IsKeyDown(Keys.Left))
+			if (Input.Left)
 			{
-				rotation -= MathHelper.ToRadians(ActualRotationVelocity);
+				Rotation -= MathHelper.ToRadians(ActualRotationVelocity);
 				rotated = true;
 			}
-			if (Keyboard.GetState().IsKeyDown(Keys.Right))
+			if (Input.Right)
 			{
-				rotation += MathHelper.ToRadians(ActualRotationVelocity);
+				Rotation += MathHelper.ToRadians(ActualRotationVelocity);
 				rotated = true;
 			}
 
@@ -162,7 +186,7 @@ namespace TestGame
 
 		public void Draw(SpriteBatch spriteBatch)
 		{
-			spriteBatch.Draw(texture, Position, null, Color.White, rotation, Origin, Scale, SpriteEffects.None, 0);	
+			spriteBatch.Draw(Texture, Position, null, Color.White, Rotation, Origin, Scale, SpriteEffects.None, 0);	
 		}
 	}
 }
